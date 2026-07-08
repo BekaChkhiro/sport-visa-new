@@ -48,7 +48,7 @@ export function ClubShell({
   return (
     <div className={`flex min-h-screen min-w-full font-sans ${T.page}`}>
       {/* Sidebar */}
-      <aside className={`hidden shrink-0 flex-col border-r p-4 transition-[width] duration-200 lg:flex ${dark ? "border-ink-800 bg-ink-950" : "border-ink-200 bg-white"} ${collapsed ? "w-[76px]" : "w-60"}`}>
+      <aside className={`hidden shrink-0 flex-col border-r p-4 transition-[width] duration-200 lg:flex lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto ${dark ? "border-ink-800 bg-ink-950" : "border-ink-200 bg-white"} ${collapsed ? "w-[76px]" : "w-60"}`}>
         <Link href="/club" className={`flex items-center gap-2 px-2 py-2 ${collapsed ? "justify-center" : ""}`}>
           <span className="grid h-7 w-7 shrink-0 place-items-center rounded-btn bg-brand-400 text-[14px] font-extrabold text-ink-950">SV</span>
           {!collapsed && <span className={`text-[15px] font-bold tracking-tight ${T.h}`}>Sport<span className={T.brand}>Visa</span></span>}

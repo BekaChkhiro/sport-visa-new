@@ -45,7 +45,7 @@ export function AdminShell({
   return (
     <div className={`flex min-h-screen min-w-full font-sans ${T.page}`}>
       {/* Sidebar */}
-      <aside className={`hidden w-60 shrink-0 flex-col border-r p-4 lg:flex ${dark ? "border-ink-800 bg-ink-950" : "border-ink-200 bg-white"}`}>
+      <aside className={`hidden w-60 shrink-0 flex-col border-r p-4 lg:flex lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto ${dark ? "border-ink-800 bg-ink-950" : "border-ink-200 bg-white"}`}>
         <Link href="/admin" className="flex items-center gap-2 px-2 py-2">
           <span className="grid h-7 w-7 place-items-center rounded-btn bg-brand-400 text-[14px] font-extrabold text-ink-950">SV</span>
           <span className={`text-[15px] font-bold tracking-tight ${T.h}`}>Sport<span className={T.brand}>Visa</span></span>
