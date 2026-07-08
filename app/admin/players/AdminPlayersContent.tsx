@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useDark, useT } from "@/components/ui/theme";
 import { Ic } from "@/components/ui/icons";
+import { InitialsAvatar } from "@/components/ui/kit";
 
 export type PlayerRow = {
   id: string;
@@ -59,8 +60,7 @@ export function AdminPlayersContent({ players }: { players: PlayerRow[] }) {
         {paged.map((p, i) => (
           <Link key={p.id + i} href={`/admin/players/${p.id}`} className={`grid grid-cols-[1fr_130px_90px_140px_100px] items-center gap-4 border-b px-5 py-3.5 last:border-0 transition-colors ${T.rowBorder} ${dark ? "hover:bg-ink-900/60" : "hover:bg-ink-50"}`}>
             <div className="flex min-w-0 items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`https://i.pravatar.cc/80?img=${p.n}`} alt="" className="h-[38px] w-[38px] rounded-full object-cover" />
+              <InitialsAvatar name={p.name} size={38} />
               <div className="min-w-0"><div className={`truncate text-[14px] font-medium ${T.h}`}>{p.name}</div><div className={`text-[12px] ${T.muted}`}>{p.pos} · {p.age}</div></div>
             </div>
             <div className={`min-w-0 text-[12.5px] ${T.t3}`}><div className="truncate">{p.city}</div><div className={`truncate ${T.faint}`}>{p.level}</div></div>

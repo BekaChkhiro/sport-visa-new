@@ -155,8 +155,7 @@ export function TrialDetailScreen({
               <div className="flex items-center">
                 {[21, 32, 45, 51, 12].slice(0, Math.min(5, trial.filled)).map((n, i) => (
                   <div key={n} style={{ marginLeft: i ? -10 : 0 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={`https://i.pravatar.cc/80?img=${n}`} alt="" className={`h-8 w-8 rounded-full border-2 object-cover ${dark ? "border-ink-900" : "border-white"}`} />
+                    <span className={`grid h-8 w-8 place-items-center rounded-full border-2 ${dark ? "border-ink-900 bg-ink-800 text-ink-400" : "border-white bg-ink-100 text-ink-500"}`}>{Ic.user("h-4 w-4")}</span>
                   </div>
                 ))}
                 {trial.filled > 5 && <span className={`ml-2 text-[12.5px] ${T.muted}`}>+{trial.filled - 5} სხვა</span>}

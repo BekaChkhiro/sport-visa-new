@@ -4,6 +4,7 @@ import { useActionState, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDark, useT } from "@/components/ui/theme";
+import { InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 import { PlayerHeader } from "@/components/app/PlayerHeader";
 import { updateProfile, addMedia, deleteMedia, type FormState } from "@/app/actions/player";
@@ -201,8 +202,7 @@ export function ProfileEditForm({ email, defaults, media }: { email: string; def
               <div className={`mb-2.5 flex items-center gap-2 text-[12px] font-semibold uppercase tracking-wider ${T.muted}`}><span className="h-1.5 w-1.5 rounded-full bg-brand-400" />ცოცხალი წინასწარი ხედი</div>
               <div className={`rounded-card border p-5 ${T.card}`}>
                 <div className="flex items-center gap-3">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="https://i.pravatar.cc/160?img=12" alt="" className={`rounded-card border-2 object-cover ${dark ? "border-ink-950" : "border-ink-50"}`} style={{ width: 52, height: 52 }} />
+                  <InitialsAvatar name={`${firstName} ${lastName}`} size={52} rounded="card" className={`border-2 ${dark ? "border-ink-950" : "border-ink-50"}`} />
                   <div className="min-w-0">
                     <div className={`text-[15px] font-bold ${T.h}`}>{firstName} {lastName}</div>
                     <div className={`flex items-center gap-1 text-[12.5px] ${T.muted}`}>{Ic.pin("h-3.5 w-3.5")}{city}</div>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDark, useT } from "@/components/ui/theme";
-import { MatchRing } from "@/components/ui/kit";
+import { MatchRing, InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 
 export type ApplicantDTO = {
@@ -53,8 +53,7 @@ export function ClubApplicantDetail({ applicant: a }: { applicant: ApplicantDTO 
 
       {/* Hero */}
       <div className={`mb-6 flex flex-wrap items-center gap-6 rounded-card border p-6 ${T.card}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="https://i.pravatar.cc/160?img=21" alt="" className="h-20 w-20 rounded-card object-cover" />
+        <InitialsAvatar name={a.name} size={80} rounded="card" />
         <div className="min-w-[220px] flex-1">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className={`font-display text-[24px] font-extrabold tracking-tight ${T.h}`}>{a.name}</h1>

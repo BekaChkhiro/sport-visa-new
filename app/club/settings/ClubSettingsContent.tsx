@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { useDark, useT } from "@/components/ui/theme";
+import { InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 import { changePassword, type FormState } from "@/app/actions/player";
 
@@ -101,8 +102,7 @@ export function ClubSettingsContent({ email, clubName }: { email: string; clubNa
             </div>
             {MEMBERS.map((m, i) => (
               <div key={m.n} className={`flex items-center gap-4 px-6 py-4 ${i > 0 ? `border-t ${T.rowBorder}` : ""}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`https://i.pravatar.cc/80?img=${m.n}`} alt="" className="h-10 w-10 rounded-full object-cover" />
+                <InitialsAvatar name={m.name} size={40} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className={`truncate text-[14px] font-medium ${T.h}`}>{m.name}</span>

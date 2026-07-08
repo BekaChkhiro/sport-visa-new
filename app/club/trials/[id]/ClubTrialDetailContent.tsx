@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDark, useT } from "@/components/ui/theme";
-import { MatchRing } from "@/components/ui/kit";
+import { MatchRing, InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 import { toggleTrialOpen, deleteTrial } from "@/app/actions/club";
 
@@ -139,8 +139,7 @@ export function ClubTrialDetailContent({ trial, top }: { trial: TrialDTO; top: T
             {top.map((a, i) => (
               <div key={a.id} className={`flex items-center gap-3 px-6 py-3 transition-colors ${i > 0 ? `border-t ${T.rowBorder}` : ""} ${dark ? "hover:bg-ink-900/60" : "hover:bg-ink-50"}`}>
                 <span className={`w-4 font-mono text-[12px] tabular-nums ${T.faint}`}>{i + 1}</span>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`https://i.pravatar.cc/80?img=${a.n}`} alt="" className="h-[38px] w-[38px] rounded-full object-cover" />
+                <InitialsAvatar name={a.name} size={38} />
                 <div className="min-w-0 flex-1"><div className={`truncate text-[14px] font-medium ${T.h}`}>{a.name}</div><div className={`truncate text-[12px] ${T.muted}`}>{a.pos}</div></div>
                 <MatchRing score={a.score} size={44} />
               </div>

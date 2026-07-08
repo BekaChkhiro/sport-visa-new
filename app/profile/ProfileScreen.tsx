@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDark, useT } from "@/components/ui/theme";
-import { MatchRing, Badge } from "@/components/ui/kit";
+import { MatchRing, Badge, InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 import { PlayerHeader } from "@/components/app/PlayerHeader";
 import { deleteMedia } from "@/app/actions/player";
@@ -78,8 +78,7 @@ export function ProfileScreen({ player, media, apps }: { player: PlayerDTO; medi
             <div className={`absolute inset-0 bg-gradient-to-t ${dark ? "from-ink-950 via-ink-950/50 to-ink-950/20" : "from-white via-white/50 to-white/10"}`} />
           </div>
           <div className="relative -mt-14 flex flex-wrap items-end gap-5 px-6 pb-6">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="https://i.pravatar.cc/160?img=12" alt="" className={`rounded-card border-4 object-cover ${dark ? "border-ink-950" : "border-ink-50"}`} style={{ width: 104, height: 104 }} />
+            <InitialsAvatar name={name} size={104} rounded="card" className={`border-4 ${dark ? "border-ink-950" : "border-ink-50"}`} />
             <div className="mb-1 flex-1">
               <div className="flex items-center gap-2.5">
                 <h1 className={`font-display text-[26px] font-extrabold tracking-tight ${T.h}`}>{name}</h1>

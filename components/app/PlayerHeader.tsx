@@ -88,7 +88,7 @@ export function PlayerHeader({
           <div className="relative">
             <button type="button" onClick={() => setMenuOpen((v) => !v)} className={`flex items-center gap-2 rounded-btn px-1.5 py-1 transition-colors ${T.hoverBg}`}>
               <span className={`hidden text-[13px] ${T.muted} sm:inline`}>{name}</span>
-              <Avatar n={avatarN} size={34} />
+              <Avatar name={name} size={34} />
             </button>
             {menuOpen && (
               <>

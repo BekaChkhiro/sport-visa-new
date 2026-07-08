@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDark, useT } from "@/components/ui/theme";
+import { InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 
 export type PlayerDetailDTO = {
@@ -61,8 +62,7 @@ export function AdminPlayerDetail({ player: p }: { player: PlayerDetailDTO }) {
 
       {/* Hero */}
       <div className={`mb-6 flex flex-wrap items-center gap-6 rounded-card border p-6 ${T.card}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="https://i.pravatar.cc/160?img=21" alt="" className={`rounded-card object-cover ${suspended ? "opacity-60" : ""}`} style={{ width: 72, height: 72 }} />
+        <InitialsAvatar name={p.name} size={72} rounded="card" className={suspended ? "opacity-60" : ""} />
         <div className="min-w-[220px] flex-1">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className={`font-display text-[24px] font-extrabold tracking-tight ${T.h}`}>{p.name}</h1>

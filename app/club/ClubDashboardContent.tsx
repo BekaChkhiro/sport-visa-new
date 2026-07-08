@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDark, useT } from "@/components/ui/theme";
+import { InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 
 export type ClubTrialRow = {
@@ -108,8 +109,7 @@ export function ClubDashboardContent({
           <div>
             {recent.map((r) => (
               <div key={r.id} className={`flex items-center gap-3 border-b px-5 py-3 last:border-0 transition-colors ${T.rowBorder} ${dark ? "hover:bg-ink-900/60" : "hover:bg-ink-50"}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`https://i.pravatar.cc/80?img=${r.n}`} alt="" className="h-[38px] w-[38px] rounded-full object-cover" />
+                <InitialsAvatar name={r.name} size={38} />
                 <div className="min-w-0 flex-1"><div className={`truncate text-[13.5px] font-medium ${T.h}`}>{r.name}</div><div className={`truncate text-[11.5px] ${T.muted}`}>{r.pos}</div></div>
                 <span className={`font-mono text-[13px] font-bold tabular-nums ${r.score >= 80 ? T.brand : "text-accent-400"}`}>{r.score}%</span>
               </div>

@@ -172,11 +172,61 @@ export function Chip({
   );
 }
 
-/* ---- Avatar -------------------------------------------------------------- */
-export function Avatar({
-  n = 12,
-  src,
+/* ---- Initials avatar ----------------------------------------------------- */
+const AVATAR_TONES = [
+  { d: "bg-brand-500/15 text-brand-300", l: "bg-brand-500/15 text-brand-700" },
+  { d: "bg-accent-500/15 text-accent-300", l: "bg-accent-500/15 text-accent-700" },
+  { d: "bg-iris-500/15 text-iris-300", l: "bg-iris-500/15 text-iris-700" },
+  { d: "bg-flame-500/15 text-flame-300", l: "bg-flame-500/15 text-flame-700" },
+  { d: "bg-info-500/15 text-info-300", l: "bg-info-500/15 text-info-700" },
+  { d: "bg-warning-500/15 text-warning-300", l: "bg-warning-500/15 text-warning-700" },
+];
+
+function toneFor(name: string) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+  return AVATAR_TONES[h % AVATAR_TONES.length];
+}
+
+export function initialsOf(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "?";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
+export function InitialsAvatar({
   name,
+  size = 40,
+  rounded = "full",
+  ring = false,
+  className = "",
+}: {
+  name: string;
+  size?: number;
+  rounded?: "full" | "card" | "btn";
+  ring?: boolean;
+  className?: string;
+}) {
+  const dark = useDark();
+  const T = useT();
+  const tone = toneFor(name);
+  const radius = rounded === "full" ? "rounded-full" : rounded === "card" ? "rounded-card" : "rounded-btn";
+  return (
+    <span
+      aria-label={name}
+      className={`inline-grid shrink-0 place-items-center font-display font-bold ${radius} ${dark ? tone.d : tone.l} ${ring ? `ring-2 ring-brand-400 ring-offset-2 ${T.ringOffset}` : ""} ${className}`}
+      style={{ width: size, height: size, fontSize: Math.round(size * 0.42) }}
+    >
+      {initialsOf(name)}
+    </span>
+  );
+}
+
+/* ---- Avatar (image with initials fallback) ------------------------------- */
+export function Avatar({
+  src,
+  name = "",
   size = 40,
   ring = false,
 }: {
@@ -187,12 +237,12 @@ export function Avatar({
   ring?: boolean;
 }) {
   const T = useT();
-  const url = src || `https://i.pravatar.cc/120?img=${n}`;
+  if (!src) return <InitialsAvatar name={name} size={size} ring={ring} />;
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={url}
-      alt={name ?? ""}
+      src={src}
+      alt={name}
       width={size}
       height={size}
       className={`rounded-full object-cover ${

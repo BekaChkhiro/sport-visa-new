@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDark, useT } from "@/components/ui/theme";
+import { InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 import { setClubAcceptingById } from "@/app/actions/admin";
 
@@ -130,8 +131,7 @@ export function AdminClubDetail({ club }: { club: ClubDetailDTO }) {
             </div>
             {club.team.map((m) => (
               <div key={m.email} className={`flex items-center gap-3 border-b px-5 py-3.5 last:border-0 ${T.rowBorder}`}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`https://i.pravatar.cc/80?img=${m.n}`} alt="" className="h-[38px] w-[38px] rounded-full object-cover" />
+                <InitialsAvatar name={m.name} size={38} />
                 <div className="min-w-0 flex-1"><div className={`truncate text-[14px] font-medium ${T.h}`}>{m.name}</div><div className={`truncate text-[12px] ${T.muted}`}>{m.email}</div></div>
                 <span className={`rounded-pill px-2 py-0.5 text-[11px] font-semibold ${T.square}`}>{m.role}</span>
               </div>

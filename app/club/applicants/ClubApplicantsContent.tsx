@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useDark, useT } from "@/components/ui/theme";
+import { InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 
 export type Applicant = {
@@ -69,8 +70,7 @@ export function ClubApplicantsContent({ applicants, slots }: { applicants: Appli
           <button key={a.id} type="button" onClick={() => setSel(a)} className={`grid w-full grid-cols-[36px_1fr_140px_120px_100px] items-center gap-4 border-b px-4 py-3 text-left transition-colors last:border-0 ${T.rowBorder} ${sel?.id === a.id ? (dark ? "bg-ink-900/80" : "bg-ink-100") : dark ? "hover:bg-ink-900/60" : "hover:bg-ink-50"}`}>
             <span className={`font-mono text-[13px] tabular-nums ${T.faint}`}>{(activePage - 1) * PAGE_SIZE + i + 1}</span>
             <div className="flex min-w-0 items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`https://i.pravatar.cc/80?img=${a.n}`} alt="" className="h-9 w-9 rounded-full object-cover" />
+              <InitialsAvatar name={a.name} size={36} />
               <div className="min-w-0"><div className={`truncate text-[14px] font-medium ${T.h}`}>{a.name}</div><div className={`text-[12px] ${T.muted}`}>{a.pos} · {a.age}</div></div>
             </div>
             <div className={`min-w-0 text-[12.5px] ${T.t3}`}><div className="truncate">{a.city}</div><div className={`truncate ${T.faint}`}>{a.level}</div></div>
@@ -108,8 +108,7 @@ export function ClubApplicantsContent({ applicants, slots }: { applicants: Appli
             </div>
             <div className="p-5">
               <div className="flex items-center gap-4">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={`https://i.pravatar.cc/120?img=${sel.n}`} alt="" className="h-16 w-16 rounded-card object-cover" />
+                <InitialsAvatar name={sel.name} size={64} rounded="card" />
                 <div className="flex-1">
                   <div className={`text-[18px] font-bold ${T.h}`}>{sel.name}</div>
                   <div className={`text-[13px] ${T.muted}`}>{sel.pos} · {sel.age} წლის · {sel.city}</div>
