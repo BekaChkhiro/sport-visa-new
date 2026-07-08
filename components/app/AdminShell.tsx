@@ -74,8 +74,7 @@ export function AdminShell({
             </div>
           )}
           <button type="button" onClick={() => setAcctOpen((v) => !v)} className={`flex w-full items-center gap-3 rounded-card border p-3 text-left transition-colors ${T.card} ${dark ? "hover:bg-ink-900" : "hover:bg-ink-50"}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="https://i.pravatar.cc/80?img=15" alt="" className="h-[34px] w-[34px] shrink-0 rounded-full object-cover" />
+            <span className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full font-display text-[13px] font-bold ${dark ? "bg-iris-500/15 text-iris-300" : "bg-iris-500/15 text-iris-700"}`}>{(email[0] ?? "A").toUpperCase()}</span>
             <div className="min-w-0 flex-1"><div className={`truncate text-[12.5px] font-medium ${T.t1}`}>ადმინისტრატორი</div><div className={`truncate text-[11px] ${T.muted}`}>{email}</div></div>
             {Ic.chevron(`h-3.5 w-3.5 shrink-0 ${T.faint} transition-transform ${acctOpen ? "-rotate-90" : "rotate-90"}`)}
           </button>

@@ -78,8 +78,7 @@ export function ClubShell({
             </div>
           )}
           <button type="button" onClick={() => setAcctOpen((v) => !v)} className={`flex w-full items-center gap-3 rounded-card border p-3 text-left transition-colors ${T.card} ${dark ? "hover:bg-ink-900" : "hover:bg-ink-50"} ${collapsed ? "justify-center" : ""}`}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="https://i.pravatar.cc/80?img=33" alt="" className="h-[34px] w-[34px] shrink-0 rounded-full object-cover" />
+            <span className={`grid h-[34px] w-[34px] shrink-0 place-items-center rounded-full font-display text-[13px] font-bold ${T.brand2} bg-brand-500/15`}>{(email[0] ?? "C").toUpperCase()}</span>
             {!collapsed && <><div className="min-w-0 flex-1"><div className={`truncate text-[12.5px] font-medium ${T.t1}`}>კლუბის მენეჯერი</div><div className={`truncate text-[11px] ${T.muted}`}>{email}</div></div>{Ic.chevron(`h-3.5 w-3.5 shrink-0 ${T.faint} transition-transform ${acctOpen ? "-rotate-90" : "rotate-90"}`)}</>}
           </button>
         </div>
