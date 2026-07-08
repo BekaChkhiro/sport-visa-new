@@ -146,8 +146,8 @@ body {
 }
 
 body {
-  background: var(--color-ink-950);
-  color: var(--color-ink-50);
+  background: var(--color-ink-50);
+  color: var(--color-ink-900);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

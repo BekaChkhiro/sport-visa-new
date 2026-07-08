@@ -66,7 +66,7 @@ type ThemeCtxValue = {
 };
 
 const ThemeCtx = createContext<ThemeCtxValue>({
-  dark: true,
+  dark: false,
   setDark: () => {},
   toggle: () => {},
 });
@@ -74,7 +74,7 @@ const ThemeCtx = createContext<ThemeCtxValue>({
 const STORAGE_KEY = "sv-theme";
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [dark, setDarkState] = useState(true);
+  const [dark, setDarkState] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
