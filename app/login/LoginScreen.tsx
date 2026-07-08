@@ -107,27 +107,25 @@ export function LoginScreen() {
                 </button>
               </form>
 
-              {process.env.NODE_ENV !== "production" && (
-                <div className="mt-6">
-                  <div className="mb-2.5 flex items-center gap-3">
-                    <div className={`h-px flex-1 ${dark ? "bg-ink-800" : "bg-ink-200"}`} />
-                    <span className={`text-[11px] ${T.faint}`}>სწრაფი სატესტო შესვლა</span>
-                    <div className={`h-px flex-1 ${dark ? "bg-ink-800" : "bg-ink-200"}`} />
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {QUICK.map((q) => (
-                      <button
-                        key={q.email}
-                        type="button"
-                        onClick={() => { setEmail(q.email); setPassword(QUICK_PW); }}
-                        className={`rounded-btn border px-2 py-2 text-[12px] font-medium transition-colors ${T.chipIdle}`}
-                      >
-                        {q.label}
-                      </button>
-                    ))}
-                  </div>
+              <div className="mt-6">
+                <div className="mb-2.5 flex items-center gap-3">
+                  <div className={`h-px flex-1 ${dark ? "bg-ink-800" : "bg-ink-200"}`} />
+                  <span className={`text-[11px] ${T.faint}`}>სწრაფი სატესტო შესვლა</span>
+                  <div className={`h-px flex-1 ${dark ? "bg-ink-800" : "bg-ink-200"}`} />
                 </div>
-              )}
+                <div className="grid grid-cols-3 gap-2">
+                  {QUICK.map((q) => (
+                    <button
+                      key={q.email}
+                      type="button"
+                      onClick={() => { setEmail(q.email); setPassword(QUICK_PW); }}
+                      className={`rounded-btn border px-2 py-2 text-[12px] font-medium transition-colors ${T.chipIdle}`}
+                    >
+                      {q.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <p className={`mt-6 text-center text-[13.5px] ${T.muted}`}>
                 არ გაქვს ანგარიში? <Link href="/register" className={`font-semibold ${T.brand}`}>დარეგისტრირდი</Link>
