@@ -10,6 +10,7 @@ import { logout } from "@/app/actions/auth";
 
 const NAV = [
   { href: "/dashboard", label: "სინჯები" },
+  { href: "/applications", label: "ჩემი განაცხადები" },
   { href: "/profile", label: "ჩემი პროფილი" },
 ];
 
@@ -79,6 +80,7 @@ export function PlayerHeader({
                       </div>
                     ))}
                   </div>
+                  <Link href="/notifications" onClick={() => setNotifOpen(false)} className={`block border-t px-3 py-2.5 text-center text-[13px] font-medium ${T.border} ${T.brand}`}>ყველა შეტყობინება →</Link>
                 </div>
               </>
             )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useDark, useT } from "@/components/ui/theme";
 import { Ic } from "@/components/ui/icons";
 
@@ -152,7 +153,7 @@ export function ClubApplicantsContent({ applicants, slots }: { applicants: Appli
 
               <div className="mt-6 flex gap-3">
                 <button type="button" onClick={() => setSel(null)} className={`flex-1 rounded-btn border py-2.5 text-sm font-medium transition-colors ${dark ? "border-ink-700 text-ink-200 hover:bg-ink-800" : "border-ink-200 text-ink-700 hover:bg-ink-100"}`}>დახურვა</button>
-                <a href={`mailto:`} className="inline-flex flex-1 items-center justify-center gap-2 rounded-btn bg-brand-400 py-2.5 text-sm font-semibold text-ink-950 transition-colors hover:bg-brand-300">{Ic.check("h-4 w-4")} მოწვევა</a>
+                <Link href={`/club/applicants/${sel.id}`} className="inline-flex flex-1 items-center justify-center gap-2 rounded-btn bg-brand-400 py-2.5 text-sm font-semibold text-ink-950 transition-colors hover:bg-brand-300">სრული პროფილი {Ic.arrow("h-4 w-4")}</Link>
               </div>
             </div>
           </div>

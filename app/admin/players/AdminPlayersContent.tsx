@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useDark, useT } from "@/components/ui/theme";
 import { Ic } from "@/components/ui/icons";
 
 export type PlayerRow = {
+  id: string;
   n: number;
   name: string;
   pos: string;
@@ -55,7 +57,7 @@ export function AdminPlayersContent({ players }: { players: PlayerRow[] }) {
           <span>მოთამაშე</span><span>ქალაქი · დონე</span><span className="text-right">განაცხადი</span><span>პროფილი</span><span>რეგისტრ.</span>
         </div>
         {paged.map((p, i) => (
-          <div key={p.name + i} className={`grid grid-cols-[1fr_130px_90px_140px_100px] items-center gap-4 border-b px-5 py-3.5 last:border-0 transition-colors ${T.rowBorder} ${dark ? "hover:bg-ink-900/60" : "hover:bg-ink-50"}`}>
+          <Link key={p.id + i} href={`/admin/players/${p.id}`} className={`grid grid-cols-[1fr_130px_90px_140px_100px] items-center gap-4 border-b px-5 py-3.5 last:border-0 transition-colors ${T.rowBorder} ${dark ? "hover:bg-ink-900/60" : "hover:bg-ink-50"}`}>
             <div className="flex min-w-0 items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={`https://i.pravatar.cc/80?img=${p.n}`} alt="" className="h-[38px] w-[38px] rounded-full object-cover" />
@@ -68,7 +70,7 @@ export function AdminPlayersContent({ players }: { players: PlayerRow[] }) {
               <span className={`w-9 text-right font-mono text-[12.5px] font-semibold tabular-nums ${doneTone(p.done)}`}>{p.done}%</span>
             </div>
             <span className={`font-mono text-[12.5px] tabular-nums ${T.muted}`}>{p.joined}</span>
-          </div>
+          </Link>
         ))}
         {paged.length === 0 && <div className={`px-5 py-12 text-center text-[13px] ${T.faint}`}>მოთამაშე ვერ მოიძებნა.</div>}
       </div>

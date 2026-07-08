@@ -94,7 +94,7 @@ export function ProfileScreen({ player, media, apps }: { player: PlayerDTO; medi
               </div>
             </div>
             <div className="mb-1 flex items-center gap-2">
-              <Link href="/player-settings" className="inline-flex h-10 items-center gap-2 rounded-btn bg-brand-400 px-4 text-sm font-semibold text-ink-950 transition-colors hover:bg-brand-300">{Ic.edit("h-4 w-4")} რედაქტირება</Link>
+              <Link href="/profile/edit" className="inline-flex h-10 items-center gap-2 rounded-btn bg-brand-400 px-4 text-sm font-semibold text-ink-950 transition-colors hover:bg-brand-300">{Ic.edit("h-4 w-4")} რედაქტირება</Link>
             </div>
           </div>
         </div>

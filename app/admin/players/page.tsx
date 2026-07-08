@@ -16,6 +16,7 @@ export default async function AdminPlayersPage() {
   });
 
   const rows: PlayerRow[] = players.map((p, i) => ({
+    id: p.id,
     n: 20 + (i % 40),
     name: `${p.firstName} ${p.lastName}`,
     pos: positionLabels[p.position],

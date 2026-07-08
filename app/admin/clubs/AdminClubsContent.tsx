@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useDark, useT } from "@/components/ui/theme";
 import { Ic } from "@/components/ui/icons";
@@ -99,10 +100,10 @@ export function AdminClubsContent({ clubs }: { clubs: ClubRow[] }) {
         </div>
         {list.map((c) => (
           <div key={c.id} className={`grid grid-cols-[1fr_120px_80px_100px_110px_44px] items-center gap-4 border-b px-5 py-3.5 last:border-0 transition-colors ${T.rowBorder} ${dark ? "hover:bg-ink-900/60" : "hover:bg-ink-50"}`}>
-            <div className="flex min-w-0 items-center gap-3">
+            <Link href={`/admin/clubs/${c.id}`} className="flex min-w-0 items-center gap-3">
               <div className={`grid h-10 w-10 shrink-0 place-items-center rounded-btn font-display text-[14px] font-bold ${toneClasses(c.tone)}`}>{c.n}</div>
               <div className="min-w-0"><div className={`truncate text-[14px] font-medium ${T.h}`}>{c.name}</div><div className={`truncate text-[12px] ${T.muted}`}>{c.league} · {c.manager}</div></div>
-            </div>
+            </Link>
             <span className={`text-[13px] ${T.t2}`}>{c.city}</span>
             <span className={`text-right font-mono text-[13px] tabular-nums ${T.t2}`}>{c.trials}</span>
             <span className={`text-right font-mono text-[13px] font-semibold tabular-nums ${T.brand}`}>{c.apps}</span>
