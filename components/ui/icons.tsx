@@ -170,6 +170,14 @@ export const Ic: Record<string, IconFn> = {
         <circle cx="12" cy="12" r="3" />
       </>
     )),
+  image: (c = "") =>
+    svg(c, (
+      <>
+        <rect x="3" y="4" width="18" height="16" rx="2.5" />
+        <circle cx="8.5" cy="9.5" r="1.5" />
+        <path d="m21 16-5-5L5 21" />
+      </>
+    )),
   trophy: (c = "") =>
     svg(c, (
       <>
