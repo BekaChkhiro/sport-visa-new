@@ -1,0 +1,153 @@
+// Sport Visa — football platform schema
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  PLAYER
+  CLUB
+  ADMIN
+}
+
+// Playing positions (Georgian labels handled in UI)
+enum Position {
+  GK // მეკარე
+  DF // დამცველი
+  MF // ნახევარმცველი
+  FW // თავდამსხმელი
+}
+
+// Age brackets used for matching
+enum AgeGroup {
+  U13
+  U15
+  U17
+  U19
+  U21
+  SENIOR
+}
+
+// Player experience / level
+enum Level {
+  BEGINNER   // დამწყები
+  AMATEUR    // მოყვარული
+  SEMI_PRO   // ნახევრად პროფესიონალი
+  PRO        // პროფესიონალი
+}
+
+enum MediaType {
+  VIDEO
+  PHOTO
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(PLAYER)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  player         PlayerProfile?
+  clubMembership ClubUser?
+}
+
+model PlayerProfile {
+  id            String     @id @default(cuid())
+  userId        String     @unique
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  firstName     String
+  lastName      String
+  birthDate     DateTime
+  ageGroup      AgeGroup
+  position      Position
+  city          String
+  level         Level
+  currentLeague String     // რომელ ლიგაში თამაშობს ახლა
+  heightCm      Int?
+  weightKg      Int?
+  bio           String?
+  onboarded     Boolean    @default(false)
+
+  media         PlayerMedia[]
+  applications  TrialApplication[]
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model PlayerMedia {
+  id        String        @id @default(cuid())
+  playerId  String
+  player    PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  type      MediaType
+  url       String
+  caption   String?
+  createdAt DateTime      @default(now())
+}
+
+model Club {
+  id              String     @id @default(cuid())
+  name            String
+  city            String
+  league          String
+  logoUrl         String?
+  description     String?
+  positionsNeeded Position[] // რომელ პოზიციებზეა მოთხოვნა
+  ageGroups       AgeGroup[] // რომელ ასაკობრივ ჯგუფებს იღებს
+  acceptingTrials Boolean    @default(false) // გამოცხადებული აქვს თუ არა მიღება
+
+  members         ClubUser[]
+  trials          Trial[]
+
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+// Links a CLUB-role user to the club they manage (admin-created)
+model ClubUser {
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clubId String
+  club   Club   @relation(fields: [clubId], references: [id], onDelete: Cascade)
+}
+
+model Trial {
+  id         String     @id @default(cuid())
+  clubId     String
+  club       Club       @relation(fields: [clubId], references: [id], onDelete: Cascade)
+  title      String
+  date       DateTime
+  location   String
+  criteria   String?    // მოთხოვნები / აღწერა
+  positions  Position[] // რომელ პოზიციებზეა სინჯი
+  ageGroups  AgeGroup[]
+  slotsLimit Int        // ადგილების ლიმიტი
+  isOpen     Boolean    @default(true)
+
+  applications TrialApplication[]
+
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model TrialApplication {
+  id         String        @id @default(cuid())
+  trialId    String
+  trial      Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  playerId   String
+  player     PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  matchScore Int           // ალგორითმის ქულა რეგისტრაციის მომენტში
+  createdAt  DateTime      @default(now())
+
+  @@unique([trialId, playerId]) // ერთ სინჯზე ერთხელ
+}

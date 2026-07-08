@@ -1,0 +1,104 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/session";
+import { hashPassword } from "@/lib/auth";
+
+export type FormState = { error?: string; ok?: string } | undefined;
+
+const clubSchema = z.object({
+  name: z.string().min(2, "შეიყვანეთ კლუბის სახელი"),
+  city: z.string().min(2, "აირჩიეთ ქალაქი"),
+  league: z.string().min(2, "აირჩიეთ ლიგა"),
+  description: z.string().optional(),
+  positionsNeeded: z.array(z.enum(["GK", "DF", "MF", "FW"])).optional(),
+  ageGroups: z
+    .array(z.enum(["U13", "U15", "U17", "U19", "U21", "SENIOR"]))
+    .optional(),
+  managerEmail: z.string().email("არასწორი ელ. ფოსტა"),
+  managerPassword: z.string().min(6, "პაროლი მინიმუმ 6 სიმბოლო"),
+  acceptingTrials: z.string().optional(),
+});
+
+export async function createClub(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireUser(["ADMIN"]);
+
+  const parsed = clubSchema.safeParse({
+    name: formData.get("name"),
+    city: formData.get("city"),
+    league: formData.get("league"),
+    description: formData.get("description") || undefined,
+    positionsNeeded: formData.getAll("positionsNeeded"),
+    ageGroups: formData.getAll("ageGroups"),
+    managerEmail: formData.get("managerEmail"),
+    managerPassword: formData.get("managerPassword"),
+    acceptingTrials: formData.get("acceptingTrials") || undefined,
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "შეავსეთ ველები სწორად" };
+  }
+
+  const d = parsed.data;
+  const email = d.managerEmail.toLowerCase().trim();
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    return { error: "ეს ელ. ფოსტა უკვე გამოყენებულია" };
+  }
+
+  await prisma.club.create({
+    data: {
+      name: d.name,
+      city: d.city,
+      league: d.league,
+      description: d.description ?? null,
+      positionsNeeded: d.positionsNeeded ?? [],
+      ageGroups: d.ageGroups ?? [],
+      acceptingTrials: d.acceptingTrials === "on",
+      members: {
+        create: {
+          user: {
+            create: {
+              email,
+              passwordHash: await hashPassword(d.managerPassword),
+              role: "CLUB",
+            },
+          },
+        },
+      },
+    },
+  });
+
+  revalidatePath("/admin");
+  return { ok: `კლუბი "${d.name}" შეიქმნა (მენეჯერი: ${email})` };
+}
+
+export async function setClubAcceptingById(
+  clubId: string,
+  accepting: boolean,
+): Promise<FormState> {
+  await requireUser(["ADMIN"]);
+  await prisma.club.update({ where: { id: clubId }, data: { acceptingTrials: accepting } });
+  revalidatePath("/admin/clubs");
+  return { ok: "განახლდა" };
+}
+
+export async function deleteClub(clubId: string): Promise<FormState> {
+  await requireUser(["ADMIN"]);
+  // Deleting the club cascades trials/applications; also remove the CLUB users.
+  const members = await prisma.clubUser.findMany({
+    where: { clubId },
+    select: { userId: true },
+  });
+  await prisma.club.delete({ where: { id: clubId } });
+  await prisma.user.deleteMany({
+    where: { id: { in: members.map((m) => m.userId) } },
+  });
+  revalidatePath("/admin");
+  return { ok: "კლუბი წაიშალა" };
+}

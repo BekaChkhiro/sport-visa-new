@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sport Visa ⚽
 
-## Getting Started
+ქართული ფეხბურთის სკაუტინგ-პლატფორმა — ფეხბურთელები ავსებენ პროფილს და ჭკვიანი
+match-score ალგორითმი აკავშირებს მათ კლუბებთან, რომლებსაც ღია სინჯები აქვთ.
+სამი როლი: **ფეხბურთელი**, **კლუბი**, **ადმინი**.
 
-First, run the development server:
+## ტექნოლოგიები
+
+- **Next.js 16** (App Router) + **React 19**
+- **Tailwind CSS v4** — dark/light თემა, სემანტიკური token-ები
+- **PostgreSQL** + **Prisma 7** (`@prisma/adapter-pg`)
+- Email + password ავტორიზაცია (bcrypt + JWT httpOnly cookie)
+- ქართული UI (Noto Sans Georgian + JetBrains Mono)
+
+## ლოკალური გაშვება
 
 ```bash
+npm install
+cp .env.example .env        # და შეავსე DATABASE_URL + AUTH_SECRET
+npx prisma migrate deploy   # ცხრილების შექმნა
+npm run db:seed             # სატესტო მონაცემები (არასავალდებულო)
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+გახსენი http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### სატესტო ანგარიშები (seed-ის შემდეგ)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+პაროლი ყველასთვის: `password123`
 
-## Learn More
+| როლი | ელ. ფოსტა |
+|------|-----------|
+| ადმინი | `admin@sportvisa.ge` |
+| კლუბი | `dinamo@sportvisa.ge` (და სხვა კლუბები) |
+| ფეხბურთელი | `player1@sportvisa.ge` … `player18@sportvisa.ge` |
 
-To learn more about Next.js, take a look at the following resources:
+## Railway-ზე deploy
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **New Project → Deploy from GitHub repo** და აირჩიე ეს რეპო.
+2. დაამატე **PostgreSQL** სერვისი (ან გამოიყენე არსებული).
+3. სერვისის **Variables**-ში დაამატე:
+   - `DATABASE_URL` — Postgres-ის connection string
+   - `AUTH_SECRET` — გრძელი შემთხვევითი სტრიქონი
+     (`node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`)
+4. ცხრილების შესაქმნელად ერთხელ გაუშვი (Railway shell-ში ან deploy command-ად):
+   ```bash
+   npx prisma migrate deploy
+   ```
+5. **Build:** `npm run build` (Prisma client გენერაცია ავტომატურად ხდება `postinstall`-ით).
+   **Start:** `npm run start`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### ატვირთული მედია (uploads)
 
-## Deploy on Vercel
+ფაილები ინახება `./uploads`-ში. Railway-ს ephemeral ფაილური სისტემა აქვს —
+persistent Volume დაამონტაჟე და მიუთითე `UPLOAD_DIR` env-ით (მაგ. `/data/uploads`),
+ან გადართე cloud storage-ზე (`lib/storage.ts`-ის ჩანაცვლებით).
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## სტრუქტურა
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/                 # Next.js routes (player / club / admin)
+  actions/           # server actions (auth, player, club, admin)
+  api/               # upload + media serving route handlers
+components/ui/        # design-system kit (theme, icons, primitives)
+components/app/       # role shells (PlayerHeader, ClubShell, AdminShell)
+lib/                 # prisma, auth, matching, recommendations, storage
+prisma/              # schema, migrations, seed
+```

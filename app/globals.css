@@ -1,49 +1,153 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import "tailwindcss";
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ==========================================================================
+   Sport Visa — design tokens (Tailwind v4 @theme)
+   Matches the Planflow design "sport-visa-new" exactly.
+   ========================================================================== */
+@theme {
+  /* Brand — pitch green */
+  --color-brand-50: #e6fef1;
+  --color-brand-100: #c4fce0;
+  --color-brand-200: #8ff7c3;
+  --color-brand-300: #52ec9f;
+  --color-brand-400: #22e07a;
+  --color-brand-500: #12c866;
+  --color-brand-600: #07a453;
+  --color-brand-700: #0a7f44;
+  --color-brand-800: #0d6139;
+  --color-brand-900: #0b4e30;
+  --color-brand-950: #032817;
 
-html {
-  height: 100%;
+  /* Accent — teal */
+  --color-accent-50: #e7fbf8;
+  --color-accent-100: #c4f4ee;
+  --color-accent-200: #8ce9de;
+  --color-accent-300: #4dd6c8;
+  --color-accent-400: #24bcae;
+  --color-accent-500: #149e93;
+  --color-accent-600: #0d7d75;
+  --color-accent-700: #0f635d;
+  --color-accent-800: #104f4b;
+  --color-accent-900: #0e413e;
+  --color-accent-950: #022321;
+
+  /* Ink — neutrals (text & surface) */
+  --color-ink-50: #f2f6f4;
+  --color-ink-100: #dbe6e1;
+  --color-ink-200: #b7c8c1;
+  --color-ink-300: #9db0aa;
+  --color-ink-400: #6d827b;
+  --color-ink-500: #4b5f58;
+  --color-ink-600: #33453f;
+  --color-ink-700: #263733;
+  --color-ink-800: #1a2723;
+  --color-ink-900: #131d1a;
+  --color-ink-950: #0a0e0d;
+
+  /* Success (alias of brand) */
+  --color-success-50: #e6fef1;
+  --color-success-100: #c4fce0;
+  --color-success-200: #8ff7c3;
+  --color-success-300: #52ec9f;
+  --color-success-400: #22e07a;
+  --color-success-500: #12c866;
+  --color-success-600: #07a453;
+  --color-success-700: #0a7f44;
+  --color-success-800: #0d6139;
+  --color-success-900: #0b4e30;
+  --color-success-950: #032817;
+
+  /* Warning — amber */
+  --color-warning-50: #fff9e6;
+  --color-warning-100: #fff0bf;
+  --color-warning-200: #ffe285;
+  --color-warning-300: #ffd451;
+  --color-warning-400: #ffcc4d;
+  --color-warning-500: #e8ab1f;
+  --color-warning-600: #c08512;
+  --color-warning-700: #996611;
+  --color-warning-800: #7a5015;
+  --color-warning-900: #664216;
+  --color-warning-950: #3b2408;
+
+  /* Danger — red */
+  --color-danger-50: #fff0f0;
+  --color-danger-100: #ffdcdd;
+  --color-danger-200: #ffc0c2;
+  --color-danger-300: #ff9498;
+  --color-danger-400: #ff5a5f;
+  --color-danger-500: #f52d34;
+  --color-danger-600: #d81219;
+  --color-danger-700: #b30f16;
+  --color-danger-800: #941318;
+  --color-danger-900: #7a161a;
+  --color-danger-950: #430608;
+
+  /* Info — blue */
+  --color-info-50: #e9f3ff;
+  --color-info-100: #cfe4ff;
+  --color-info-200: #a6cbff;
+  --color-info-300: #6fa8ff;
+  --color-info-400: #4088ff;
+  --color-info-500: #1f66f0;
+  --color-info-600: #124fce;
+  --color-info-700: #123fa3;
+  --color-info-800: #153886;
+  --color-info-900: #16336e;
+  --color-info-950: #0d1e43;
+
+  /* Iris — purple */
+  --color-iris-50: #f0edff;
+  --color-iris-100: #e3ddff;
+  --color-iris-200: #cbc0ff;
+  --color-iris-300: #ab97ff;
+  --color-iris-400: #8b6bff;
+  --color-iris-500: #7247f5;
+  --color-iris-600: #5f30d8;
+  --color-iris-700: #4f26b3;
+  --color-iris-800: #412391;
+  --color-iris-900: #372074;
+  --color-iris-950: #210f4d;
+
+  /* Flame — orange */
+  --color-flame-50: #fff2ed;
+  --color-flame-100: #ffe0d3;
+  --color-flame-200: #ffbda1;
+  --color-flame-300: #ff926a;
+  --color-flame-400: #ff6b3d;
+  --color-flame-500: #f5471a;
+  --color-flame-600: #d8300f;
+  --color-flame-700: #b32410;
+  --color-flame-800: #901f15;
+  --color-flame-900: #761d15;
+  --color-flame-950: #400a06;
+
+  /* Radii */
+  --radius-field: 0.625rem;
+  --radius-btn: 0.625rem;
+  --radius-card: 1rem;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.15);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.22), 0 1px 2px -1px rgb(0 0 0 / 0.14);
+  --shadow-pop: 0 10px 30px -6px rgb(0 0 0 / 0.4);
+  --shadow-float: 0 20px 55px -10px rgb(0 0 0 / 0.55);
+
+  /* Fonts (bridged to next/font CSS variables) */
+  --font-sans: var(--font-noto-georgian), system-ui, sans-serif;
+  --font-display: var(--font-noto-georgian), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 }
 
 html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  height: 100%;
 }
 
 body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ink-950);
+  color: var(--color-ink-50);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
 }
