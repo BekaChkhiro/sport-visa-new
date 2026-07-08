@@ -11,14 +11,17 @@ const TONES = ["brand", "accent", "iris", "flame"];
 export default async function AdminTrialsPage() {
   const session = await requireUser(["ADMIN"]);
 
-  const trials = await prisma.trial.findMany({
-    orderBy: { date: "desc" },
-    include: {
-      club: true,
-      applications: { select: { matchScore: true } },
-      _count: { select: { applications: true } },
-    },
-  });
+  const [trials, clubs] = await Promise.all([
+    prisma.trial.findMany({
+      orderBy: { date: "desc" },
+      include: {
+        club: true,
+        applications: { select: { matchScore: true } },
+        _count: { select: { applications: true } },
+      },
+    }),
+    prisma.club.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
+  ]);
 
   const clubTone = new Map<string, string>();
   let ti = 0;
@@ -41,7 +44,7 @@ export default async function AdminTrialsPage() {
 
   return (
     <AdminShell email={session.email} title="სინჯები" subtitle="ყველა კლუბის სასინჯო ღონისძიება ერთ ადგილას">
-      <AdminTrialsContent trials={rows} />
+      <AdminTrialsContent trials={rows} clubs={clubs} />
     </AdminShell>
   );
 }

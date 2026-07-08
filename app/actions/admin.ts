@@ -78,6 +78,62 @@ export async function createClub(
   return { ok: `კლუბი "${d.name}" შეიქმნა (მენეჯერი: ${email})` };
 }
 
+const adminTrialSchema = z.object({
+  clubId: z.string().min(1, "აირჩიე კლუბი"),
+  title: z.string().min(3, "შეიყვანე სათაური"),
+  date: z.string().min(1, "აირჩიე თარიღი"),
+  location: z.string().min(2, "შეიყვანე ადგილი"),
+  criteria: z.string().optional(),
+  slotsLimit: z.coerce.number().int().min(1, "მინიმუმ 1 ადგილი").max(200),
+  positions: z.array(z.enum(["GK", "DF", "MF", "FW"])).optional(),
+  ageGroups: z.array(z.enum(["U13", "U15", "U17", "U19", "U21", "SENIOR"])).optional(),
+});
+
+// Admin creates a trial for any chosen club.
+export async function createTrialForClub(
+  _prev: FormState,
+  formData: FormData,
+): Promise<FormState> {
+  await requireUser(["ADMIN"]);
+
+  const parsed = adminTrialSchema.safeParse({
+    clubId: formData.get("clubId"),
+    title: formData.get("title"),
+    date: formData.get("date"),
+    location: formData.get("location"),
+    criteria: formData.get("criteria") || undefined,
+    slotsLimit: formData.get("slotsLimit"),
+    positions: formData.getAll("positions"),
+    ageGroups: formData.getAll("ageGroups"),
+  });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "შეავსე ველები სწორად" };
+  }
+
+  const d = parsed.data;
+  const club = await prisma.club.findUnique({ where: { id: d.clubId } });
+  if (!club) return { error: "კლუბი ვერ მოიძებნა" };
+
+  await prisma.trial.create({
+    data: {
+      clubId: d.clubId,
+      title: d.title,
+      date: new Date(d.date),
+      location: d.location,
+      criteria: d.criteria ?? null,
+      slotsLimit: d.slotsLimit,
+      positions: d.positions ?? [],
+      ageGroups: d.ageGroups ?? [],
+      isOpen: true,
+    },
+  });
+  await prisma.club.update({ where: { id: d.clubId }, data: { acceptingTrials: true } });
+
+  revalidatePath("/admin/trials");
+  revalidatePath("/admin");
+  return { ok: `სინჯი დაემატა კლუბს „${club.name}"` };
+}
+
 export async function setClubAcceptingById(
   clubId: string,
   accepting: boolean,
