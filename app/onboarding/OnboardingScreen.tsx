@@ -20,6 +20,7 @@ import {
 type Pos = "GK" | "DF" | "MF" | "FW";
 type Lvl = "BEGINNER" | "AMATEUR" | "SEMI_PRO" | "PRO";
 type FootV = "RIGHT" | "LEFT" | "BOTH";
+type MascotKey = "height" | "weight";
 
 const STEPS = [
   "ვინ ხარ",
@@ -111,6 +112,7 @@ export function OnboardingScreen({ defaults }: { defaults: Defaults }) {
   const [weightKg, setWeightKg] = useState("");
   const [sprint10, setSprint10] = useState("");
   const [sprint30, setSprint30] = useState("");
+  const [physMascot, setPhysMascot] = useState<MascotKey>("height");
 
   // step 4 — team & contract
   const [activeSeason, setActiveSeason] = useState("");
@@ -378,22 +380,25 @@ export function OnboardingScreen({ defaults }: { defaults: Defaults }) {
               )}
 
               {step === 3 && (
-                <div className="space-y-5">
-                  <StepHead n="04" title="ფიზიკური მონაცემები" desc="სიმაღლე, წონა და სპრინტის დრო. (არასავალდებულო)" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <FField label="სიმაღლე (სმ)"><input type="number" className={inputCls} value={heightCm} onChange={(e) => setHeightCm(e.target.value)} placeholder="178" /></FField>
-                    <FField label="წონა (კგ)"><input type="number" className={inputCls} value={weightKg} onChange={(e) => setWeightKg(e.target.value)} placeholder="70" /></FField>
+                <div className="grid gap-6 lg:grid-cols-[1fr_210px]">
+                  <div className="space-y-5">
+                    <StepHead n="04" title="ფიზიკური მონაცემები" desc="სიმაღლე, წონა და სპრინტის დრო. (არასავალდებულო)" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <FField label="სიმაღლე (სმ)"><input type="number" className={inputCls} value={heightCm} onFocus={() => setPhysMascot("height")} onChange={(e) => setHeightCm(e.target.value)} placeholder="178" /></FField>
+                      <FField label="წონა (კგ)"><input type="number" className={inputCls} value={weightKg} onFocus={() => setPhysMascot("weight")} onChange={(e) => setWeightKg(e.target.value)} placeholder="70" /></FField>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FField label="სპრინტი 10მ (წამი)">
+                        <input type="number" step="0.01" className={inputCls} value={sprint10} onFocus={() => setPhysMascot("height")} onChange={(e) => setSprint10(e.target.value)} placeholder="1.80" />
+                        {kmh(10, toNum(sprint10)) && <span className={`mt-1 block text-xs ${T.muted}`}>≈ {kmh(10, toNum(sprint10))} კმ/სთ</span>}
+                      </FField>
+                      <FField label="სპრინტი 30მ (წამი)">
+                        <input type="number" step="0.01" className={inputCls} value={sprint30} onFocus={() => setPhysMascot("height")} onChange={(e) => setSprint30(e.target.value)} placeholder="4.10" />
+                        {kmh(30, toNum(sprint30)) && <span className={`mt-1 block text-xs ${T.muted}`}>≈ {kmh(30, toNum(sprint30))} კმ/სთ</span>}
+                      </FField>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <FField label="სპრინტი 10მ (წამი)">
-                      <input type="number" step="0.01" className={inputCls} value={sprint10} onChange={(e) => setSprint10(e.target.value)} placeholder="1.80" />
-                      {kmh(10, toNum(sprint10)) && <span className={`mt-1 block text-xs ${T.muted}`}>≈ {kmh(10, toNum(sprint10))} კმ/სთ</span>}
-                    </FField>
-                    <FField label="სპრინტი 30მ (წამი)">
-                      <input type="number" step="0.01" className={inputCls} value={sprint30} onChange={(e) => setSprint30(e.target.value)} placeholder="4.10" />
-                      {kmh(30, toNum(sprint30)) && <span className={`mt-1 block text-xs ${T.muted}`}>≈ {kmh(30, toNum(sprint30))} კმ/სთ</span>}
-                    </FField>
-                  </div>
+                  <Mascot which={physMascot} />
                 </div>
               )}
 
@@ -562,6 +567,25 @@ export function OnboardingScreen({ defaults }: { defaults: Defaults }) {
   function Empty({ text }: { text: string }) {
     return <p className={`rounded-card border border-dashed px-4 py-5 text-center text-[13px] ${dark ? "border-ink-700 text-ink-500" : "border-ink-300 text-ink-400"}`}>{text}</p>;
   }
+}
+
+// Onboarding illustration for the physical step — switches between the
+// height/weight кацуна images as the player focuses each field. Each image
+// carries its own background, so the frame matches it (light for height,
+// dark for weight). Hidden on small screens to keep the form roomy.
+function Mascot({ which }: { which: MascotKey }) {
+  const dark = useDark();
+  const light = which === "height";
+  const caption = which === "height" ? "შენი სიმაღლე" : "შენი წონა";
+  return (
+    <div className="hidden lg:block">
+      <div className={`overflow-hidden rounded-card border ${light ? "border-ink-200 bg-white" : "border-ink-800 bg-ink-950"}`}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={`/mascots/${which}.png`} alt="" className="h-auto w-full object-cover" />
+      </div>
+      <p className={`mt-2 text-center text-[12px] font-medium ${dark ? "text-ink-400" : "text-ink-500"}`}>{caption}</p>
+    </div>
+  );
 }
 
 type CareerRow = { teamName: string; startYear: string; endYear: string; position: string; jersey: string };
