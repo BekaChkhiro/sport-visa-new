@@ -36,10 +36,10 @@ enum AgeGroup {
 
 // Player experience / level
 enum Level {
-  BEGINNER   // დამწყები
-  AMATEUR    // მოყვარული
-  SEMI_PRO   // ნახევრად პროფესიონალი
-  PRO        // პროფესიონალი
+  BEGINNER // დამწყები
+  AMATEUR // მოყვარული
+  SEMI_PRO // ნახევრად პროფესიონალი
+  PRO // პროფესიონალი
 }
 
 enum MediaType {
@@ -47,22 +47,29 @@ enum MediaType {
   PHOTO
 }
 
+// Preferred playing foot
+enum Foot {
+  RIGHT
+  LEFT
+  BOTH
+}
+
 model User {
-  id           String    @id @default(cuid())
-  email        String    @unique
+  id           String   @id @default(cuid())
+  email        String   @unique
   passwordHash String
-  role         Role      @default(PLAYER)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  role         Role     @default(PLAYER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   player         PlayerProfile?
   clubMembership ClubUser?
 }
 
 model PlayerProfile {
-  id            String     @id @default(cuid())
-  userId        String     @unique
-  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   firstName     String
   lastName      String
@@ -71,17 +78,74 @@ model PlayerProfile {
   position      Position
   city          String
   level         Level
-  currentLeague String     // რომელ ლიგაში თამაშობს ახლა
+  currentLeague String // რომელ ლიგაში თამაშობს ახლა
   heightCm      Int?
   weightKg      Int?
   bio           String?
-  onboarded     Boolean    @default(false)
+  onboarded     Boolean  @default(false)
 
-  media         PlayerMedia[]
-  applications  TrialApplication[]
+  // --- Player passport (optional, enriches profile) ---
+  photoUrl       String? // R2 ფაილი — პროფილის ფოტო
+  nationality    String? // მოქალაქეობა (ISO კოდი, მაგ. "GE")
+  school         String? // სად სწავლობს
+  gradesSheetUrl String? // R2 ფაილი — ნიშნების ფურცელი
+  sprint10m      Float? // სპრინტი 10მ (წამი)
+  sprint30m      Float? // სპრინტი 30მ (წამი)
+  activeSeason   String? // "2025/2026"
+  currentTeam    String? // მიმდინარე გუნდი
+  contractStart  DateTime?
+  contractEnd    DateTime? // კონტრაქტის მოქმედების ვადა
+  contractDocUrl String? // R2 ფაილი — კონტრაქტი
+  jerseyNumber   Int? // მაისურის ნომერი
+  preferredFoot  Foot?
+  rightFootPct   Int? // 0–100
+  leftFootPct    Int? // 0–100
 
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  media          PlayerMedia[]
+  applications   TrialApplication[]
+  positionSkills PositionSkill[] // დამატებითი პოზიციები %-ით
+  career         CareerEntry[] // წარსული გუნდები
+  matchLinks     MatchLink[] // თამაშების ლინკები + ისტორია
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Secondary positions the player can also play, with confidence percentage
+model PositionSkill {
+  id         String        @id @default(cuid())
+  playerId   String
+  player     PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  position   Position
+  percentage Int // 0–100
+
+  @@unique([playerId, position])
+}
+
+// Past clubs — career history
+model CareerEntry {
+  id           String        @id @default(cuid())
+  playerId     String
+  player       PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  teamName     String
+  startYear    Int
+  endYear      Int? // null = ამჟამად
+  position     Position?
+  jerseyNumber Int?
+
+  createdAt DateTime @default(now())
+}
+
+// Match/game links with when & against whom
+model MatchLink {
+  id          String        @id @default(cuid())
+  playerId    String
+  player      PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  url         String
+  matchDate   DateTime?
+  opponent    String?
+  competition String?
+  createdAt   DateTime      @default(now())
 }
 
 model PlayerMedia {
@@ -105,11 +169,11 @@ model Club {
   ageGroups       AgeGroup[] // რომელ ასაკობრივ ჯგუფებს იღებს
   acceptingTrials Boolean    @default(false) // გამოცხადებული აქვს თუ არა მიღება
 
-  members         ClubUser[]
-  trials          Trial[]
+  members ClubUser[]
+  trials  Trial[]
 
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 // Links a CLUB-role user to the club they manage (admin-created)
@@ -128,16 +192,16 @@ model Trial {
   title      String
   date       DateTime
   location   String
-  criteria   String?    // მოთხოვნები / აღწერა
+  criteria   String? // მოთხოვნები / აღწერა
   positions  Position[] // რომელ პოზიციებზეა სინჯი
   ageGroups  AgeGroup[]
-  slotsLimit Int        // ადგილების ლიმიტი
+  slotsLimit Int // ადგილების ლიმიტი
   isOpen     Boolean    @default(true)
 
   applications TrialApplication[]
 
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model TrialApplication {
@@ -146,7 +210,7 @@ model TrialApplication {
   trial      Trial         @relation(fields: [trialId], references: [id], onDelete: Cascade)
   playerId   String
   player     PlayerProfile @relation(fields: [playerId], references: [id], onDelete: Cascade)
-  matchScore Int           // ალგორითმის ქულა რეგისტრაციის მომენტში
+  matchScore Int // ალგორითმის ქულა რეგისტრაციის მომენტში
   createdAt  DateTime      @default(now())
 
   @@unique([trialId, playerId]) // ერთ სინჯზე ერთხელ

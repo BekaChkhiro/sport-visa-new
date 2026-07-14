@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useDark, useT } from "@/components/ui/theme";
 import { MatchRing, InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
+import { PassportView } from "@/components/app/PassportView";
+import type { PassportDTO } from "@/lib/passport";
 
 export type ApplicantDTO = {
   name: string;
@@ -18,6 +20,10 @@ export type ApplicantDTO = {
   heightCm: number | null;
   weightKg: number | null;
   bio: string | null;
+  photoUrl: string | null;
+  nationality: string | null;
+  jerseyNumber: number | null;
+  passport: PassportDTO;
   score: number;
   trialTitle: string;
   appliedDate: string;
@@ -45,6 +51,8 @@ export function ClubApplicantDetail({ applicant: a }: { applicant: ApplicantDTO 
     ["სიმაღლე", a.heightCm ? `${a.heightCm} სმ` : "—"],
     ["წონა", a.weightKg ? `${a.weightKg} კგ` : "—"],
     ["დონე", a.level],
+    ["მოქალაქეობა", a.nationality || "—"],
+    ["მაისურის №", a.jerseyNumber != null ? `#${a.jerseyNumber}` : "—"],
   ];
 
   return (
@@ -53,7 +61,12 @@ export function ClubApplicantDetail({ applicant: a }: { applicant: ApplicantDTO 
 
       {/* Hero */}
       <div className={`mb-6 flex flex-wrap items-center gap-6 rounded-card border p-6 ${T.card}`}>
-        <InitialsAvatar name={a.name} size={80} rounded="card" />
+        {a.photoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={a.photoUrl} alt={a.name} width={80} height={80} className="h-20 w-20 rounded-card object-cover" />
+        ) : (
+          <InitialsAvatar name={a.name} size={80} rounded="card" />
+        )}
         <div className="min-w-[220px] flex-1">
           <div className="flex flex-wrap items-center gap-2.5">
             <h1 className={`font-display text-[24px] font-extrabold tracking-tight ${T.h}`}>{a.name}</h1>
@@ -117,6 +130,8 @@ export function ClubApplicantDetail({ applicant: a }: { applicant: ApplicantDTO 
             <h2 className={`mb-2 text-[15px] font-bold ${T.h}`}>ჩემ შესახებ</h2>
             <p className={`text-[14px] leading-relaxed ${T.t3}`}>{a.bio || "ბიოგრაფია არ არის მითითებული."}</p>
           </div>
+
+          <PassportView p={a.passport} />
         </div>
 
         {/* Right */}

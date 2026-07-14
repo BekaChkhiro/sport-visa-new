@@ -1,16 +1,17 @@
 import "server-only";
 import { randomUUID } from "crypto";
-import { mkdir, writeFile, unlink, readFile, stat } from "fs/promises";
+import { readFile, stat } from "fs/promises";
 import path from "path";
+import { putObject, deleteObject, keyFromUrl } from "./r2";
 
-// Local-disk storage for uploaded media.
-// Swap this module for S3/Cloudinary later — the public interface stays the same.
+// Media & document storage backed by Cloudflare R2 (S3-compatible).
+// New uploads go to R2 and are served from its public URL. The legacy
+// local-disk readers below still resolve any pre-R2 /api/media/* URLs.
 
-const UPLOAD_DIR =
+// Legacy local-disk dir — only read for old uploads, never written to.
+const LEGACY_UPLOAD_DIR =
   process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads");
-
-// URL prefix that maps to the media-serving route handler.
-const PUBLIC_PREFIX = "/api/media/";
+const LEGACY_PREFIX = "/api/media/";
 
 export const ALLOWED_IMAGE_TYPES = [
   "image/jpeg",
@@ -23,9 +24,11 @@ export const ALLOWED_VIDEO_TYPES = [
   "video/webm",
   "video/quicktime",
 ];
+export const ALLOWED_DOC_TYPES = ["application/pdf"];
 
 export const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
 export const MAX_VIDEO_BYTES = 100 * 1024 * 1024; // 100MB
+export const MAX_DOC_BYTES = 15 * 1024 * 1024; // 15MB
 
 const EXT_BY_MIME: Record<string, string> = {
   "image/jpeg": "jpg",
@@ -35,22 +38,37 @@ const EXT_BY_MIME: Record<string, string> = {
   "video/mp4": "mp4",
   "video/webm": "webm",
   "video/quicktime": "mov",
+  "application/pdf": "pdf",
 };
 
 export type SavedFile = { url: string; storedName: string };
 
+// Upload a file to R2 under the given folder. Returns its public URL.
 export async function saveUpload(
   buffer: Buffer,
   mimeType: string,
+  folder = "media",
 ): Promise<SavedFile> {
-  await mkdir(UPLOAD_DIR, { recursive: true });
   const ext = EXT_BY_MIME[mimeType] ?? "bin";
   const storedName = `${randomUUID()}.${ext}`;
-  await writeFile(path.join(UPLOAD_DIR, storedName), buffer);
-  return { url: `${PUBLIC_PREFIX}${storedName}`, storedName };
+  const key = `${folder}/${storedName}`;
+  const url = await putObject(key, buffer, mimeType);
+  return { url, storedName };
 }
 
-// Guard against path traversal — only allow bare file names.
+// Delete a stored file given its public URL (no-op for external/legacy URLs).
+export async function deleteByUrl(url: string): Promise<void> {
+  const key = keyFromUrl(url);
+  if (!key) return; // not an R2 URL — leave it alone
+  try {
+    await deleteObject(key);
+  } catch {
+    // already gone — ignore
+  }
+}
+
+// ---- Legacy local-disk read (pre-R2 /api/media/* URLs only) ----
+
 function safeName(name: string): string | null {
   if (!name || name.includes("/") || name.includes("\\") || name.includes(".."))
     return null;
@@ -62,7 +80,7 @@ export async function readUpload(
 ): Promise<{ data: Buffer; size: number } | null> {
   const safe = safeName(name);
   if (!safe) return null;
-  const filePath = path.join(UPLOAD_DIR, safe);
+  const filePath = path.join(LEGACY_UPLOAD_DIR, safe);
   try {
     const info = await stat(filePath);
     if (!info.isFile()) return null;
@@ -73,16 +91,8 @@ export async function readUpload(
   }
 }
 
-// Delete a stored file given its public URL (no-op for external URLs).
-export async function deleteByUrl(url: string): Promise<void> {
-  if (!url.startsWith(PUBLIC_PREFIX)) return;
-  const name = safeName(url.slice(PUBLIC_PREFIX.length));
-  if (!name) return;
-  try {
-    await unlink(path.join(UPLOAD_DIR, name));
-  } catch {
-    // already gone — ignore
-  }
+export function isLegacyUrl(url: string): boolean {
+  return url.startsWith(LEGACY_PREFIX);
 }
 
 export function contentTypeForName(name: string): string {
@@ -96,6 +106,7 @@ export function contentTypeForName(name: string): string {
     mp4: "video/mp4",
     webm: "video/webm",
     mov: "video/quicktime",
+    pdf: "application/pdf",
   };
   return (ext && map[ext]) || "application/octet-stream";
 }

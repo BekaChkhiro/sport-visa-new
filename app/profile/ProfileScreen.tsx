@@ -7,7 +7,9 @@ import { useDark, useT } from "@/components/ui/theme";
 import { MatchRing, Badge, InitialsAvatar } from "@/components/ui/kit";
 import { Ic } from "@/components/ui/icons";
 import { PlayerHeader } from "@/components/app/PlayerHeader";
+import { PassportView } from "@/components/app/PassportView";
 import { deleteMedia } from "@/app/actions/player";
+import type { PassportDTO } from "@/lib/passport";
 
 export type MediaDTO = { id: string; type: "VIDEO" | "PHOTO"; url: string; caption: string | null };
 export type AppDTO = { id: string; club: string; badge: string; league: string; date: string; score: number };
@@ -25,13 +27,16 @@ type PlayerDTO = {
   heightCm: number | null;
   weightKg: number | null;
   bio: string | null;
+  photoUrl: string | null;
+  nationality: string | null;
+  jerseyNumber: number | null;
   completeness: number;
 };
 
 const TABS = ["მიმოხილვა", "მედია", "განაცხადები"];
 const COVER = "https://live.staticflickr.com/8286/7794221892_2db05a6c93_b.jpg";
 
-export function ProfileScreen({ player, media, apps }: { player: PlayerDTO; media: MediaDTO[]; apps: AppDTO[] }) {
+export function ProfileScreen({ player, passport, media, apps }: { player: PlayerDTO; passport: PassportDTO; media: MediaDTO[]; apps: AppDTO[] }) {
   const dark = useDark();
   const T = useT();
   const router = useRouter();
@@ -48,6 +53,8 @@ export function ProfileScreen({ player, media, apps }: { player: PlayerDTO; medi
     ["სიმაღლე", player.heightCm ? `${player.heightCm} სმ` : "—"],
     ["წონა", player.weightKg ? `${player.weightKg} კგ` : "—"],
     ["დონე", player.level],
+    ["მოქალაქეობა", player.nationality || "—"],
+    ["მაისურის №", player.jerseyNumber != null ? `#${player.jerseyNumber}` : "—"],
   ];
 
   async function onFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -78,7 +85,12 @@ export function ProfileScreen({ player, media, apps }: { player: PlayerDTO; medi
             <div className={`absolute inset-0 bg-gradient-to-t ${dark ? "from-ink-950 via-ink-950/50 to-ink-950/20" : "from-white via-white/50 to-white/10"}`} />
           </div>
           <div className="relative -mt-14 flex flex-wrap items-end gap-5 px-6 pb-6">
-            <InitialsAvatar name={name} size={104} rounded="card" className={`border-4 ${dark ? "border-ink-950" : "border-ink-50"}`} />
+            {player.photoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={player.photoUrl} alt={name} width={104} height={104} className={`h-[104px] w-[104px] rounded-card border-4 object-cover ${dark ? "border-ink-950" : "border-ink-50"}`} />
+            ) : (
+              <InitialsAvatar name={name} size={104} rounded="card" className={`border-4 ${dark ? "border-ink-950" : "border-ink-50"}`} />
+            )}
             <div className="mb-1 flex-1">
               <div className="flex items-center gap-2.5">
                 <h1 className={`font-display text-[26px] font-extrabold tracking-tight ${T.h}`}>{name}</h1>
@@ -134,6 +146,7 @@ export function ProfileScreen({ player, media, apps }: { player: PlayerDTO; medi
                     <Badge tone="neutral">აქტიური</Badge>
                   </div>
                 </div>
+                <PassportView p={passport} />
               </div>
             )}
 

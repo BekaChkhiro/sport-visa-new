@@ -166,16 +166,55 @@ export async function changePassword(
   return { ok: true };
 }
 
-// Full wizard submit — saves profile + media, returns matched clubs for the reveal.
+// Full wizard submit — saves profile + passport + media, returns matched clubs.
+type Pos = "GK" | "DF" | "MF" | "FW";
+
+export type PositionSkillInput = { position: Pos; percentage: number };
+export type CareerInput = {
+  teamName: string;
+  startYear: number;
+  endYear?: number | null;
+  position?: Pos | null;
+  jerseyNumber?: number | null;
+};
+export type MatchLinkInput = {
+  url: string;
+  matchDate?: string | null;
+  opponent?: string | null;
+  competition?: string | null;
+};
+
 export type OnboardingInput = {
+  // --- required core (feeds matching) ---
   firstName: string;
   lastName: string;
   birthDate: string;
-  position: "GK" | "DF" | "MF" | "FW";
+  position: Pos;
   city: string;
   level: "BEGINNER" | "AMATEUR" | "SEMI_PRO" | "PRO";
   currentLeague: string;
-  media: string[];
+  // --- optional passport ---
+  photoUrl?: string | null;
+  nationality?: string | null;
+  school?: string | null;
+  gradesSheetUrl?: string | null;
+  heightCm?: number | null;
+  weightKg?: number | null;
+  sprint10m?: number | null;
+  sprint30m?: number | null;
+  activeSeason?: string | null;
+  currentTeam?: string | null;
+  contractStart?: string | null;
+  contractEnd?: string | null;
+  contractDocUrl?: string | null;
+  jerseyNumber?: number | null;
+  preferredFoot?: "RIGHT" | "LEFT" | "BOTH" | null;
+  rightFootPct?: number | null;
+  leftFootPct?: number | null;
+  positionSkills?: PositionSkillInput[];
+  career?: CareerInput[];
+  matchLinks?: MatchLinkInput[];
+  media?: string[];
 };
 
 export type MatchRevealDTO = {
@@ -185,14 +224,69 @@ export type MatchRevealDTO = {
   score: number;
 };
 
+const posEnum = z.enum(["GK", "DF", "MF", "FW"]);
+const emptyToUndef = (v: unknown) => (v === "" || v === null ? undefined : v);
+const optStr = z.preprocess(emptyToUndef, z.string().optional());
+const optUrl = z.preprocess(
+  emptyToUndef,
+  z.string().url("არასწორი ბმული").optional(),
+);
+const optInt = z.preprocess(emptyToUndef, z.coerce.number().int().optional());
+const optNum = z.preprocess(emptyToUndef, z.coerce.number().optional());
+const optPct = z.preprocess(
+  emptyToUndef,
+  z.coerce.number().int().min(0).max(100).optional(),
+);
+
 const onboardingWizardSchema = z.object({
   firstName: z.string().min(2, "შეიყვანე სახელი"),
   lastName: z.string().min(2, "შეიყვანე გვარი"),
   birthDate: z.string().min(1, "აირჩიე დაბადების თარიღი"),
-  position: z.enum(["GK", "DF", "MF", "FW"]),
+  position: posEnum,
   city: z.string().min(2, "აირჩიე ქალაქი"),
   level: z.enum(["BEGINNER", "AMATEUR", "SEMI_PRO", "PRO"]),
   currentLeague: z.string().min(2, "შეიყვანე ლიგა"),
+  photoUrl: optUrl,
+  nationality: optStr,
+  school: optStr,
+  gradesSheetUrl: optUrl,
+  heightCm: optInt,
+  weightKg: optInt,
+  sprint10m: optNum,
+  sprint30m: optNum,
+  activeSeason: optStr,
+  currentTeam: optStr,
+  contractStart: optStr,
+  contractEnd: optStr,
+  contractDocUrl: optUrl,
+  jerseyNumber: optInt,
+  preferredFoot: z.enum(["RIGHT", "LEFT", "BOTH"]).nullish(),
+  rightFootPct: optPct,
+  leftFootPct: optPct,
+  positionSkills: z
+    .array(z.object({ position: posEnum, percentage: z.coerce.number().int().min(0).max(100) }))
+    .optional(),
+  career: z
+    .array(
+      z.object({
+        teamName: z.string().min(1),
+        startYear: z.coerce.number().int().min(1950).max(2100),
+        endYear: optInt,
+        position: posEnum.nullish(),
+        jerseyNumber: optInt,
+      }),
+    )
+    .optional(),
+  matchLinks: z
+    .array(
+      z.object({
+        url: z.string().url("არასწორი ბმული"),
+        matchDate: optStr,
+        opponent: optStr,
+        competition: optStr,
+      }),
+    )
+    .optional(),
   media: z.array(z.string().url()).optional(),
 });
 
@@ -202,6 +296,90 @@ function clubInitials(name: string): string {
     .slice(0, 2)
     .map((w) => w[0] ?? "")
     .join("");
+}
+
+type WizardData = z.infer<typeof onboardingWizardSchema>;
+
+// Shared persistence for onboarding + passport edit: upserts the profile and
+// replaces the nested passport collections. Does NOT touch media (managed
+// separately). Returns the profile.
+async function persistProfile(userId: string, d: WizardData) {
+  const birthDate = new Date(d.birthDate);
+  const data = {
+    firstName: d.firstName,
+    lastName: d.lastName,
+    birthDate,
+    ageGroup: ageGroupFromBirthDate(birthDate),
+    position: d.position,
+    city: d.city,
+    level: d.level,
+    currentLeague: d.currentLeague,
+    onboarded: true,
+    // passport
+    photoUrl: d.photoUrl ?? null,
+    nationality: d.nationality ?? null,
+    school: d.school ?? null,
+    gradesSheetUrl: d.gradesSheetUrl ?? null,
+    heightCm: d.heightCm ?? null,
+    weightKg: d.weightKg ?? null,
+    sprint10m: d.sprint10m ?? null,
+    sprint30m: d.sprint30m ?? null,
+    activeSeason: d.activeSeason ?? null,
+    currentTeam: d.currentTeam ?? null,
+    contractStart: d.contractStart ? new Date(d.contractStart) : null,
+    contractEnd: d.contractEnd ? new Date(d.contractEnd) : null,
+    contractDocUrl: d.contractDocUrl ?? null,
+    jerseyNumber: d.jerseyNumber ?? null,
+    preferredFoot: d.preferredFoot ?? null,
+    rightFootPct: d.rightFootPct ?? null,
+    leftFootPct: d.leftFootPct ?? null,
+  };
+
+  const profile = await prisma.playerProfile.upsert({
+    where: { userId },
+    create: { userId, ...data },
+    update: data,
+  });
+
+  // Replace nested passport collections
+  await prisma.$transaction([
+    prisma.positionSkill.deleteMany({ where: { playerId: profile.id } }),
+    prisma.careerEntry.deleteMany({ where: { playerId: profile.id } }),
+    prisma.matchLink.deleteMany({ where: { playerId: profile.id } }),
+  ]);
+  if (d.positionSkills?.length) {
+    await prisma.positionSkill.createMany({
+      data: d.positionSkills.map((s) => ({
+        playerId: profile.id,
+        position: s.position,
+        percentage: s.percentage,
+      })),
+    });
+  }
+  if (d.career?.length) {
+    await prisma.careerEntry.createMany({
+      data: d.career.map((c) => ({
+        playerId: profile.id,
+        teamName: c.teamName,
+        startYear: c.startYear,
+        endYear: c.endYear ?? null,
+        position: c.position ?? null,
+        jerseyNumber: c.jerseyNumber ?? null,
+      })),
+    });
+  }
+  if (d.matchLinks?.length) {
+    await prisma.matchLink.createMany({
+      data: d.matchLinks.map((m) => ({
+        playerId: profile.id,
+        url: m.url,
+        matchDate: m.matchDate ? new Date(m.matchDate) : null,
+        opponent: m.opponent ?? null,
+        competition: m.competition ?? null,
+      })),
+    });
+  }
+  return profile;
 }
 
 export async function submitOnboarding(
@@ -214,26 +392,9 @@ export async function submitOnboarding(
   }
 
   const d = parsed.data;
-  const birthDate = new Date(d.birthDate);
-  const data = {
-    firstName: d.firstName,
-    lastName: d.lastName,
-    birthDate,
-    ageGroup: ageGroupFromBirthDate(birthDate),
-    position: d.position,
-    city: d.city,
-    level: d.level,
-    currentLeague: d.currentLeague,
-    onboarded: true,
-  };
+  const profile = await persistProfile(session.userId, d);
 
-  const profile = await prisma.playerProfile.upsert({
-    where: { userId: session.userId },
-    create: { userId: session.userId, ...data },
-    update: data,
-  });
-
-  // Persist media links as VIDEO entries
+  // Persist highlight links as VIDEO entries
   if (d.media && d.media.length) {
     await prisma.playerMedia.createMany({
       data: d.media.map((url) => ({
@@ -264,6 +425,21 @@ export async function submitOnboarding(
 
   revalidatePath("/dashboard");
   return { matches };
+}
+
+// Edit-mode save — full passport update from the profile edit form.
+export async function saveProfileEdits(
+  input: OnboardingInput,
+): Promise<{ error?: string; ok?: boolean }> {
+  const session = await requireUser(["PLAYER"]);
+  const parsed = onboardingWizardSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "შეავსე ველები სწორად" };
+  }
+  await persistProfile(session.userId, parsed.data);
+  revalidatePath("/profile");
+  revalidatePath("/dashboard");
+  return { ok: true };
 }
 
 // Apply to a trial — computes & stores the match score at apply time.

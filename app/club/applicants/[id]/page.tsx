@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { getClubForUser, ageFromBirth } from "@/lib/club";
 import { positionLabels, ageGroupLabels, levelLabels } from "@/lib/labels";
+import { buildPassport } from "@/lib/passport";
 import { ClubShell } from "@/components/app/ClubShell";
 import { ClubApplicantDetail, type ApplicantDTO } from "./ClubApplicantDetail";
 
@@ -20,7 +21,15 @@ export default async function ClubApplicantDetailPage({
     where: { id, trial: { clubId: club.id } },
     include: {
       trial: true,
-      player: { include: { media: true, user: true } },
+      player: {
+        include: {
+          media: true,
+          user: true,
+          positionSkills: { orderBy: { percentage: "desc" } },
+          career: { orderBy: { startYear: "desc" } },
+          matchLinks: { orderBy: { matchDate: "desc" } },
+        },
+      },
     },
   });
   if (!app) notFound();
@@ -42,6 +51,10 @@ export default async function ClubApplicantDetailPage({
     heightCm: p.heightCm,
     weightKg: p.weightKg,
     bio: p.bio,
+    photoUrl: p.photoUrl,
+    nationality: p.nationality,
+    jerseyNumber: p.jerseyNumber,
+    passport: buildPassport(p),
     score: app.matchScore,
     trialTitle: app.trial.title,
     appliedDate: app.createdAt.toLocaleDateString("ka-GE", { day: "numeric", month: "long" }),

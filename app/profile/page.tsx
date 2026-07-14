@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { positionLabels, ageGroupLabels, levelLabels } from "@/lib/labels";
+import { buildPassport } from "@/lib/passport";
 import { ProfileScreen, type MediaDTO, type AppDTO } from "./ProfileScreen";
 
 function ageFromBirth(d: Date): number {
@@ -25,6 +26,9 @@ export default async function ProfilePage() {
         orderBy: { createdAt: "desc" },
         include: { trial: { include: { club: true } } },
       },
+      positionSkills: { orderBy: { percentage: "desc" } },
+      career: { orderBy: { startYear: "desc" } },
+      matchLinks: { orderBy: { matchDate: "desc" } },
     },
   });
   if (!player?.onboarded) redirect("/onboarding");
@@ -45,6 +49,8 @@ export default async function ProfilePage() {
     score: a.matchScore,
   }));
 
+  const passport = buildPassport(player);
+
   return (
     <ProfileScreen
       player={{
@@ -60,8 +66,12 @@ export default async function ProfilePage() {
         heightCm: player.heightCm,
         weightKg: player.weightKg,
         bio: player.bio,
+        photoUrl: player.photoUrl,
+        nationality: player.nationality,
+        jerseyNumber: player.jerseyNumber,
         completeness: media.length > 0 ? 100 : 80,
       }}
+      passport={passport}
       media={media}
       apps={apps}
     />
